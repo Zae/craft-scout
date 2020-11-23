@@ -137,6 +137,8 @@ class SearchableBehavior extends Behavior
         }
         // @codeCoverageIgnoreEnd
 
+        $localisations = $this->getLocalisations($this->owner);
+
         return new Collection(array_merge(
             $assets,
             $categories,
@@ -146,7 +148,8 @@ class SearchableBehavior extends Behavior
             $globalSets,
             $matrixBlocks,
             $products,
-            $variants
+            $variants,
+            $localisations
         ));
     }
 
@@ -165,5 +168,38 @@ class SearchableBehavior extends Behavior
         }
 
         return true;
+    }
+
+    /**
+     * @param Element $element
+     *
+     * @return array
+     */
+    private function getLocalisations(Element $element): array
+    {
+        $localisations = [];
+
+        foreach ($element->getSupportedSites() as $site) {
+            if (empty($site['siteId'])) {
+                // CraftCMS is so weird...
+                continue;
+            }
+
+            if ($site['siteId'] === $element->siteId) {
+                // not the current site, we are looking for OTHER localisations ;)
+                continue;
+            }
+
+            /** @var SearchableBehavior|null $searchable */
+            $searchable = $element::find()
+                                  ->siteId($site['siteId'])
+                                  ->one();
+
+            if (!empty($searchable)) {
+                $localisations[] = $searchable;
+            }
+        }
+
+        return $localisations;
     }
 }
