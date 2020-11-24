@@ -192,6 +192,7 @@ class SearchableBehavior extends Behavior
 
             /** @var SearchableBehavior|null $searchable */
             $searchable = $element::find()
+                                  ->id($element->id)
                                   ->siteId($site['siteId'])
                                   ->one();
 
